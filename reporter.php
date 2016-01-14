@@ -17,6 +17,7 @@ try {
     // If the IP checked different from the current IP logged (to file). Send
     // notification
     if ($currentIp !== $ip) {
+        ftruncate($handle, 0);
         fwrite($handle, $ip);
 
         if ($currentIp !== '') {
