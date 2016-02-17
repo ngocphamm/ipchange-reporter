@@ -1,5 +1,6 @@
 {
     "require": {
-        "mailgun/mailgun-php": "^1.8"
+        "mailgun/mailgun-php": "^1.8",
+        "nategood/httpful": "^0.2.20"
     }
 }
