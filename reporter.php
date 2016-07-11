@@ -13,7 +13,7 @@ try {
     if ($handle === false) return 1;
 
     $currentIp = trim(stream_get_contents($handle));
-    $ip = trim(file_get_contents('http://i.ngx.cc'));
+    $ip = trim(file_get_contents('https://i.ngx.cc'));
 
     // If the IP checked different from the current IP logged (to file), update
     // CloudFlare DNS record for and send and email notification
