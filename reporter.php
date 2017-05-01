@@ -21,7 +21,7 @@ try {
         ftruncate($handle, 0);
         fwrite($handle, $ip);
 
-        if ($currentIp !== '') {
+        if ($ip !== '') {
             // Update CloudFlare DNS using API call
             $cfPutData = [
                 'content' => $ip,
@@ -43,17 +43,14 @@ try {
             }
 
             // Send email using Mailgun
-            $mg = new Mailgun($config['mailgun_api_key']);
+            $mg = Mailgun::create($config['mailgun_api_key']);
 
-            $mg->sendMessage(
-                $config['mailgun_domain'],
-                [
-                    'from'    => $config['report_from_email'],
-                    'to'      => $config['report_to_email'],
-                    'subject' => 'Home IP has changed',
-                    'text'    => 'Ngoc, your new IP is ' . $ip
-                ]
-            );
+            $mg->messages()->send($config['mailgun_domain'], [
+                'from'    => $config['report_from_email'],
+                'to'      => $config['report_to_email'],
+                'subject' => 'Home IP has changed',
+                'text'    => 'Ngoc, your new IP is ' . $ip
+            ]);
         }
     }
 } catch (Exception $e) {
