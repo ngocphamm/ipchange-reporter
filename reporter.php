@@ -9,7 +9,7 @@ use Mailgun\Mailgun;
 try {
     $config = loadConfig();
 
-    $handle = fopen('ip.txt', 'c+');
+    $handle = fopen(__DIR__ . '/ip.txt', 'c+');
     if ($handle === false) return 1;
 
     $currentIp = trim(stream_get_contents($handle));
