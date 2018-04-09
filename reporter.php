@@ -49,7 +49,7 @@ try {
                 'from'    => $config['report_from_email'],
                 'to'      => $config['report_to_email'],
                 'subject' => 'Home IP has changed',
-                'text'    => 'Ngoc, your new IP is ' . $ip
+                'text'    => 'Ngoc, your new IP is ' . $ip . ' Old IP: ' . $currentIp
             ]);
         }
     }
