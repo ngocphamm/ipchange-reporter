@@ -1,3 +1,5 @@
+**NOTE: Latest changes require PHP 7.1**
+
 I always try to automate parts of my daily life if possible.
 
 This very very simple script runs off my Raspberry Pi at home to check if my public IP address has changed. 
