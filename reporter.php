@@ -68,7 +68,7 @@ try {
     echo $e->getMessage();
     return 1;
 } finally {
-    if ($db !== null) {
+    if (isset($db) && $db !== null) {
         $db = null;
     }
 }
