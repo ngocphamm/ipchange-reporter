@@ -17,7 +17,7 @@ try {
     $stmt->execute();
     $currentIp = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $ip = trim(file_get_contents('https://i.ngx.cc'));
+    $ip = trim(file_get_contents('https://api.ipify.org'));
 
     if ($ip === '') exit;
 
