@@ -25,8 +25,8 @@ try {
     // CloudFlare DNS record for and send and email notification
     if ($currentIp === false || $currentIp['ip'] !== $ip) {
         // Add ip to database
-        $stmt = $db->prepare('INSERT INTO ip (ip, added_at, check_count) VALUES (:ip, :dt, 1)')
-                    ->execute([ ':ip' => $ip, ':dt' => date('Y-m-d H:i:s') ]);
+        $stmt = $db->prepare('INSERT INTO ip (ip, check_count, added_at, last_updated) VALUES (:ip, 1, :aa, :lu)')
+                    ->execute([ ':ip' => $ip, ':aa' => date('Y-m-d H:i:s'), ':lu' => date('Y-m-d H:i:s') ]);
 
         // Update CloudFlare DNS using API call
         $client = new Client([ 'base_uri' => 'https://api.cloudflare.com/client/v4/zones/' ]);
@@ -62,9 +62,10 @@ try {
         ]);
     } else {
         // Update check count
-        $db->prepare('UPDATE ip SET check_count = :cc WHERE id = :id')
+        $db->prepare('UPDATE ip SET check_count = :cc, last_updated = :lu WHERE id = :id')
             ->execute([
                 ':cc' => $currentIp['check_count'] + 1,
+                ':lu' => date('Y-m-d H:i:s'),
                 ':id' => intval($currentIp['id'])
             ]);
     }
