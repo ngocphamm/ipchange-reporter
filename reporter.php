@@ -32,13 +32,13 @@ try {
         $client = new Client([ 'base_uri' => 'https://api.cloudflare.com/client/v4/zones/' ]);
         $promise = $client->requestAsync('PUT', "{$config['cloudflare_zone_id']}/dns_records/{$config['cloudflare_domain_id']}", [
             'headers' => [
-                'X-Auth-Key' => $config['cloudflare_api_key'],
-                'X-Auth-Email' => $config['cloudflare_email']
+                'Authorization' => "Bearer {$config['cloudflare_api_token']}"
             ],
             'json' => [
                 'content' => $ip,
                 'type' => 'A',
-                'name' => $config['cloudflare_domain_name']
+                'name' => $config['cloudflare_domain_name'],
+                'ttl'  => 1, // Automatic
             ]
         ])->then(
             function (ResponseInterface $res) {
@@ -53,12 +53,13 @@ try {
 
         // Send email using Mailgun
         $mg = Mailgun::create($config['mailgun_api_key']);
+        $oldIp = $currentIp === false ? 'NONE' : $currentIp['ip'];
 
         $mg->messages()->send($config['mailgun_domain'], [
             'from'    => $config['report_from_email'],
             'to'      => $config['report_to_email'],
             'subject' => 'Home IP has changed',
-            'text'    => "New IP: {$ip}\nOld IP: {$currentIp['ip']}"
+            'text'    => "New IP: {$ip}\nOld IP: {$oldIp}"
         ]);
     } else {
         // Update check count
