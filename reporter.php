@@ -13,6 +13,23 @@ try {
     $db = new PDO('sqlite:' . __DIR__ . '/ip.db3');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Set some PRAGMA
+    $db->exec('PRAGMA journal_mode = wal;');
+    $db->exec('PRAGMA busy_timeout = 5000;');
+
+    // Create table if needed
+    $createTableSql = <<<SQL
+        CREATE TABLE IF NOT EXISTS `ip` (
+            `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            `ip` TEXT NOT NULL,
+            `check_count` INTEGER NOT NULL,
+            `added_at` TEXT NOT NULL,
+            `last_updated` TEXT
+        );
+    SQL;
+
+    $db->exec($createTableSql);
+
     $stmt = $db->query('SELECT * FROM ip ORDER BY added_at DESC LIMIT 1');
     $stmt->execute();
     $currentIp = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -25,8 +42,8 @@ try {
     // CloudFlare DNS record for and send and email notification
     if ($currentIp === false || $currentIp['ip'] !== $ip) {
         // Add ip to database
-        $stmt = $db->prepare('INSERT INTO ip (ip, check_count, added_at, last_updated) VALUES (:ip, 1, :aa, :lu)')
-                    ->execute([ ':ip' => $ip, ':aa' => date('Y-m-d H:i:s'), ':lu' => date('Y-m-d H:i:s') ]);
+        $db->prepare('INSERT INTO ip (ip, check_count, added_at, last_updated) VALUES (:ip, 1, :aa, :lu)')
+            ->execute([ ':ip' => $ip, ':aa' => date('Y-m-d H:i:s'), ':lu' => date('Y-m-d H:i:s') ]);
 
         // Update CloudFlare DNS using API call
         $client = new Client([ 'base_uri' => 'https://api.cloudflare.com/client/v4/zones/' ]);
