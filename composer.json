@@ -8,6 +8,6 @@
         "mailgun/mailgun-php": "^2.5",
         "php-http/curl-client": "^1.7",
         "guzzlehttp/psr7": "^1.8",
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "^6.5"
     }
 }
