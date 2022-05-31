@@ -16,6 +16,8 @@ cron-ipcheck:
   container_name: ipcheck
   build:
     context: ipchange-reporter
+    args:
+      - TZ=America/New_York
   entrypoint: [ "bash", "-c", "cron -f" ]
   volumes:
     - /path/to/ipchange-reporter:/usr/src/ipcheck

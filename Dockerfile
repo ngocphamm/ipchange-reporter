@@ -1,7 +1,13 @@
 FROM php:8.1-cli
 
+ARG TZ
+
 # Installing cron package
 RUN apt-get update && apt-get -y install cron nano
+
+# Set timezone for the image
+RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime
+RUN printf '[PHP]\ndate.timezone = "%s"\n' "$TZ" > $PHP_INI_DIR/conf.d/tzone.ini
 
 # Copy the crontab in a location where it will be parsed by the system
 COPY crontab /etc/cron.d/crontab
