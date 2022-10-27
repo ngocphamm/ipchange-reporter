@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface;
 try {
     $config = require_once __DIR__ . '/config.php';
 
-    $db = new PDO('sqlite:' . __DIR__ . '/ip.db3');
+    $db = new PDO('sqlite:' . __DIR__ . '/sqlite/ip.db3');
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Set some PRAGMA

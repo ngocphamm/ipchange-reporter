@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/local/bin/php /usr/src/ipcheck/reporter.php
