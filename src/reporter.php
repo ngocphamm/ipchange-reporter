@@ -43,7 +43,11 @@ try {
     if ($currentIp === false || $currentIp['ip'] !== $ip) {
         // Add ip to database
         $db->prepare('INSERT INTO ip (ip, check_count, added_at, last_updated) VALUES (:ip, 1, :aa, :lu)')
-            ->execute([ ':ip' => $ip, ':aa' => date('Y-m-d H:i:s'), ':lu' => date('Y-m-d H:i:s') ]);
+            ->execute([
+                ':ip' => $ip,
+                ':aa' => date('Y-m-d H:i:s'),
+                ':lu' => date('Y-m-d H:i:s')
+            ]);
 
         // Update CloudFlare DNS using API call
         $client = new Client([ 'base_uri' => 'https://api.cloudflare.com/client/v4/zones/' ]);
@@ -53,9 +57,9 @@ try {
             ],
             'json' => [
                 'content' => $ip,
-                'type' => 'A',
-                'name' => $config['cloudflare_domain_name'],
-                'ttl'  => 1, // Automatic
+                'type'    => 'A',
+                'name'    => $config['cloudflare_domain_name'],
+                'ttl'     => 1, // Automatic
             ]
         ])->then(
             function (ResponseInterface $res) {
