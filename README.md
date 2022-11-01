@@ -1,4 +1,4 @@
-**Requires PHP 7.0**
+**Requires PHP 7.0. Tested on PHP 8.1**
 
 I always try to automate parts of my daily life if possible.
 
@@ -11,14 +11,17 @@ In addition, it will also update CloudFlare DNS record to point the the new IP a
 Use Docker Compose like the following. The `ip.db3` file would have to `chmod 666` so the cronjob can write to it.
 
 ```
-cron-ipcheck:
-  image: cron-ipcheck
+ipcheck:
+  image: php:cli-alpine
   container_name: ipcheck
-  build:
-    context: ipchange-reporter
-    args:
-      - TZ=America/New_York
-  entrypoint: [ "bash", "-c", "cron -f" ]
+  command: >
+    sh -c "printf 'date.timezone = ${TZ}' > $${PHP_INI_DIR}/conf.d/tzone.ini &&
+    crond -f -l 8"
   volumes:
-    - /path/to/ipchange-reporter:/usr/src/ipcheck
+    - /etc/localtime:/etc/localtime:ro # Use timezone from host
+    - ./ipchange-reporter/crond/hourly:/etc/periodic/hourly/:ro # The file in this folder needs `chmod +u` inside the host
+    - ./ipchange-reporter/src:/usr/src/ipcheck
+  restart: unless-stopped
 ```
+
+`ip.db3` file should be placed in `src/sqlite` folder.
