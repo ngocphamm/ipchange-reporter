@@ -1,11 +1,11 @@
 {
-    "config": {
-        "platform": {
-            "php": "7.0"
-        }
-    },
     "require": {
-        "mailgun/mailgun-php": "^2.5",
-        "guzzlehttp/guzzle": "^6.5"
+        "mailgun/mailgun-php": "^3.5",
+        "guzzlehttp/guzzle": "^7.7"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     }
 }

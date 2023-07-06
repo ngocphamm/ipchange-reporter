@@ -4,6 +4,7 @@
 // CREATE TABLE "ip"(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, ip text not null, check_count integer not null, added_at text not null, last_updated text);
 
 $config = [
+    'ipcheck_url'            => 'https://icanhazip.com',
     'cloudflare_api_token'   => '',
     'cloudflare_email'       => '',
     'cloudflare_zone_id'     => '',

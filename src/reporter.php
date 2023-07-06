@@ -34,7 +34,7 @@ try {
     $stmt->execute();
     $currentIp = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $ip = trim(file_get_contents('https://api.ipify.org'));
+    $ip = trim(file_get_contents($config['ipcheck_url']));
 
     if ($ip === '') exit;
 
