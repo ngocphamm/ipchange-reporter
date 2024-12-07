@@ -83,13 +83,15 @@ try {
             'text'    => "New IP: {$ip}\nOld IP: {$oldIp}"
         ]);
     } else {
-        // Update check count
-        $db->prepare('UPDATE ip SET check_count = :cc, last_updated = :lu WHERE id = :id')
-            ->execute([
+        // Update check count, but only at the hour
+        if (date('i') === '00') {
+            $db->prepare('UPDATE ip SET check_count = :cc, last_updated = :lu WHERE id = :id')
+                ->execute([
                 ':cc' => $currentIp['check_count'] + 1,
                 ':lu' => date('Y-m-d H:i:s'),
                 ':id' => intval($currentIp['id'])
             ]);
+        }
     }
 } catch (Exception $e) {
     echo $e->getMessage();
