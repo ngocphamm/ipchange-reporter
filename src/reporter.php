@@ -1,16 +1,53 @@
 <?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+function getEnvVar(string $name) {
+    return getenv($name, true) ?: getenv($name);
+}
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use Mailgun\Mailgun;
-use Psr\Http\Message\ResponseInterface;
+function makeRequest(
+    string $url,
+    string $method,
+    string $authorization,
+    string $contentType,
+    array $content
+) {
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_URL             => $url,
+        CURLOPT_RETURNTRANSFER  => true,
+        CURLOPT_CUSTOMREQUEST   => $method,
+        CURLOPT_HTTPHEADER      => [
+            'Content-Type: ' . $contentType,
+            'Authorization: ' . $authorization,
+        ],
+        CURLOPT_POSTFIELDS      => $contentType === 'application/json' ? json_encode($content) : $content
+    ]);
+
+    $response = curl_exec($curl);
+    $error = curl_error($curl);
+
+    curl_close($curl);
+
+    return compact('response', 'error');
+}
+
+$config = [
+    'ipcheck_url'            => 'https://icanhazip.com',
+    'ip_db_file'             => getEnvVar('SQLITE_DB_FILENAME'),
+    'cloudflare_api_token'   => getEnvVar('CLOUDFLARE_API_TOKEN'),
+    'cloudflare_email'       => getEnvVar('CLOUDFLARE_EMAIL'),
+    'cloudflare_zone_id'     => getEnvVar('CLOUDFLARE_ZONE_ID'),
+    'cloudflare_domain_id'   => getEnvVar('CLOUDFLARE_DOMAIN_ID'),
+    'cloudflare_domain_name' => getEnvVar('CLOUDFLARE_DOMAIN_NAME'),
+    'mailgun_api_key'        => getEnvVar('MAILGUN_API_KEY'),
+    'mailgun_domain'         => getEnvVar('MAILGUN_DOMAIN'),
+    'report_from_email'      => getEnvVar('REPORT_FROM_EMAIL'),
+    'report_to_email'        => getEnvVar('REPORT_TO_EMAIL')
+];
 
 try {
-    $config = require_once __DIR__ . '/config.php';
-
-    $db = new PDO('sqlite:' . __DIR__ . '/sqlite/ip.db3');
+    $db = new PDO('sqlite:' . __DIR__ . '/sqlite/' . $config['ip_db_file']);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Set some PRAGMA
@@ -50,38 +87,45 @@ try {
             ]);
 
         // Update CloudFlare DNS using API call
-        $client = new Client([ 'base_uri' => 'https://api.cloudflare.com/client/v4/zones/' ]);
-        $promise = $client->requestAsync('PUT', "{$config['cloudflare_zone_id']}/dns_records/{$config['cloudflare_domain_id']}", [
-            'headers' => [
-                'Authorization' => "Bearer {$config['cloudflare_api_token']}"
-            ],
-            'json' => [
+        $cfRes = makeRequest(
+            "https://api.cloudflare.com/client/v4/zones/{$config['cloudflare_zone_id']}/dns_records/{$config['cloudflare_domain_id']}",
+            'PATCH',
+            "Bearer {$config['cloudflare_api_token']}",
+            'application/json',
+            [
                 'content' => $ip,
                 'type'    => 'A',
                 'name'    => $config['cloudflare_domain_name'],
                 'ttl'     => 1, // Automatic
             ]
-        ])->then(
-            function (ResponseInterface $res) {
-                if ($res->getStatusCode() !== 200) {
-                    throw new Exception("Attempt to update CloudFlare DNS record failed! Status code: {$res->getStatusCode()}");
-                }
-            },
-            function (RequestException $e) {
-                throw new Exception("Attempt to update CloudFlare DNS record failed! Message: {$e->getMessage()}");
-            }
-        )->wait();
+        );
+
+        $responseObj = json_decode($cfRes['response']);
+
+        if (!$responseObj->success) {
+            throw new Exception("Failed to update CloudFlare DNS record! Message: {$responseObj->errors[0]->message}");
+        }
 
         // Send email using Mailgun
-        $mg = Mailgun::create($config['mailgun_api_key']);
         $oldIp = $currentIp === false ? 'NONE' : $currentIp['ip'];
-
-        $mg->messages()->send($config['mailgun_domain'], [
+        $mgPayload = array(
             'from'    => $config['report_from_email'],
             'to'      => $config['report_to_email'],
             'subject' => 'Home IP has changed',
             'text'    => "New IP: {$ip}\nOld IP: {$oldIp}"
-        ]);
+        );
+
+        $mgRes = makeRequest(
+            "https://api.mailgun.net/v3/{$config['mailgun_domain']}/messages",
+            'POST',
+            'Basic ' . base64_encode("api:{$config['mailgun_api_key']}"),
+            'multipart/form-data',
+            $mgPayload
+        );
+
+        if ($mgRes['error']) {
+            throw new Exception("Failed to send email with Mailgun! Message: {$mgRes['error']}");
+        }
     } else {
         // Update check count, but only at the hour
         if (date('i') === '00') {

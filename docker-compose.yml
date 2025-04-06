@@ -1,0 +1,26 @@
+services:
+  ipcheck:
+    image: php:cli-alpine
+    container_name: ipcheck
+    command: >
+      sh -c "printf 'date.timezone = ${TZ}' > $${PHP_INI_DIR}/conf.d/tzone.ini &&
+      crond -f -l 8"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro # Use timezone from host
+      - ./crond/15min:/etc/periodic/15min/:ro # The file in this folder needs `chmod +x` inside the host
+      - ./src:/app
+      - ${DATA_FOLDER_BASEPATH}/homeipdb:/app/sqlite
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  # litestream-ipdb:
+  #   image: litestream/litestream
+  #   container_name: litestream-ipdb
+  #   environment:
+  #     - LITESTREAM_ACCESS_KEY_ID=${LITESTREAM_ACCESS_KEY_ID}
+  #     - LITESTREAM_SECRET_ACCESS_KEY=${LITESTREAM_SECRET_ACCESS_KEY}
+  #   command: replicate /data/${SQLITE_DB_FILENAME} s3://${LITESTREAM_S3_BUCKET_NAME}/${SQLITE_DB_FILENAME}
+  #   volumes:
+  #     - ${DATA_FOLDER_BASEPATH}/homeipdb/${SQLITE_DB_FILENAME}:/data/${SQLITE_DB_FILENAME}
+  #   restart: unless-stopped

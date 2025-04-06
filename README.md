@@ -1,27 +1,29 @@
-**Requires PHP 7.0. Tested on PHP 8.1**
+Check your public IP address (via default `https://icanhazip.com` but feel free to change to whatever service you want), and update a DNS record of your choice, in CloudFlare, and send an email notification, with Mailgun.
 
-I always try to automate parts of my daily life if possible.
+It will be checked every 15 minutes, but only logged to the database (SQLite) once very hour. The cron can be changed to [whatever supported by Alpine](https://wiki.alpinelinux.org/wiki/Cron). Can also check out [this FAQ](https://wiki.alpinelinux.org/wiki/Alpine_Linux:FAQ#Why_don't_my_cron_jobs_run?).
 
-This very very simple script runs off my Raspberry Pi at home to check if my public IP address has changed. 
-
-If yes, it will email me and I can just forward the email so my new IP address will be included in my company's remote desktop firewall rules.
-
-In addition, it will also update CloudFlare DNS record to point the the new IP address, so basically I have a "free" Dynamic DNS setup here!
-
-Use Docker Compose like the following. The `ip.db3` file would have to `chmod 666` so the cronjob can write to it.
+`.env` file should look like below with the data pieces for CloudFlare and Mailgun.
 
 ```
-ipcheck:
-  image: php:cli-alpine
-  container_name: ipcheck
-  command: >
-    sh -c "printf 'date.timezone = ${TZ}' > $${PHP_INI_DIR}/conf.d/tzone.ini &&
-    crond -f -l 8"
-  volumes:
-    - /etc/localtime:/etc/localtime:ro # Use timezone from host
-    - ./ipchange-reporter/crond/hourly:/etc/periodic/hourly/:ro # The file in this folder needs `chmod +u` inside the host
-    - ./ipchange-reporter/src:/usr/src/ipcheck
-  restart: unless-stopped
+TZ=America/New_York
+
+DATA_FOLDER_BASEPATH=/path/to/persistent/data/folder
+
+CLOUDFLARE_API_TOKEN=''
+CLOUDFLARE_EMAIL=''
+CLOUDFLARE_ZONE_ID=''
+CLOUDFLARE_DOMAIN_ID=''
+CLOUDFLARE_DOMAIN_NAME=''
+MAILGUN_API_KEY=''
+MAILGUN_DOMAIN=''
+REPORT_FROM_EMAIL=''
+REPORT_TO_EMAIL=''
 ```
 
-`ip.db3` file should be placed in `src/sqlite` folder.
+Optionally, you can also have [Litestream service](https://litestream.io/guides/docker/) to replicate the SQLite database to an AWS S3 bucket of your choice. When that is needed, uncomment out the `litestream` service in `docker-compose.yml` file, and add the following to `.env` file.
+
+```
+LITESTREAM_ACCESS_KEY_ID=''
+LITESTREAM_SECRET_ACCESS_KEY=''
+LITESTREAM_S3_BUCKET_NAME=''
+```
