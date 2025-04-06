@@ -78,7 +78,7 @@ try {
     // If the IP checked different from the current IP logged (to file), update
     // CloudFlare DNS record for and send and email notification
     if ($currentIp === false || $currentIp['ip'] !== $ip) {
-        // Add ip to database
+        // Add IP to database
         $db->prepare('INSERT INTO ip (ip, check_count, added_at, last_updated) VALUES (:ip, 1, :aa, :lu)')
             ->execute([
                 ':ip' => $ip,

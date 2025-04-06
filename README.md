@@ -1,6 +1,6 @@
 Check your public IP address (via default `https://icanhazip.com` but feel free to change to whatever service you want), and update a DNS record of your choice, in CloudFlare, and send an email notification, with Mailgun.
 
-It will be checked every 15 minutes, but only logged to the database (SQLite) once very hour. The cron can be changed to [whatever supported by Alpine](https://wiki.alpinelinux.org/wiki/Cron). Can also check out [this FAQ](https://wiki.alpinelinux.org/wiki/Alpine_Linux:FAQ#Why_don't_my_cron_jobs_run?).
+It is be checked every 15 minutes, but only logged to the database (SQLite) once every hour. The cron can be changed to [whatever supported by Alpine](https://wiki.alpinelinux.org/wiki/Cron). Can also check out [this FAQ](https://wiki.alpinelinux.org/wiki/Alpine_Linux:FAQ#Why_don't_my_cron_jobs_run?).
 
 `.env` file should look like below with the data pieces for CloudFlare and Mailgun.
 
