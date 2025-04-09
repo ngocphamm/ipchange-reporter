@@ -11,8 +11,17 @@ services:
       - ./src:/app
       - ${DATA_FOLDER_BASEPATH}/homeipdb:/app/sqlite
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      - SQLITE_DB_FILENAME=${SQLITE_DB_FILENAME}
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+      - CLOUDFLARE_ZONE_ID=${CLOUDFLARE_ZONE_ID}
+      - CLOUDFLARE_DOMAIN_ID=${CLOUDFLARE_DOMAIN_ID}
+      - CLOUDFLARE_DOMAIN_NAME=${CLOUDFLARE_DOMAIN_NAME}
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
+      - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
+      - REPORT_FROM_EMAIL=${REPORT_FROM_EMAIL}
+      - REPORT_TO_EMAIL=${REPORT_TO_EMAIL}
 
   litestream-ipdb:
     image: litestream/litestream
