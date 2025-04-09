@@ -14,13 +14,13 @@ services:
     env_file:
       - .env
 
-  # litestream-ipdb:
-  #   image: litestream/litestream
-  #   container_name: litestream-ipdb
-  #   environment:
-  #     - LITESTREAM_ACCESS_KEY_ID=${LITESTREAM_ACCESS_KEY_ID}
-  #     - LITESTREAM_SECRET_ACCESS_KEY=${LITESTREAM_SECRET_ACCESS_KEY}
-  #   command: replicate /data/${SQLITE_DB_FILENAME} s3://${LITESTREAM_S3_BUCKET_NAME}/${SQLITE_DB_FILENAME}
-  #   volumes:
-  #     - ${DATA_FOLDER_BASEPATH}/homeipdb/${SQLITE_DB_FILENAME}:/data/${SQLITE_DB_FILENAME}
-  #   restart: unless-stopped
+  litestream-ipdb:
+    image: litestream/litestream
+    container_name: litestream-ipdb
+    environment:
+      - LITESTREAM_ACCESS_KEY_ID=${LITESTREAM_ACCESS_KEY_ID}
+      - LITESTREAM_SECRET_ACCESS_KEY=${LITESTREAM_SECRET_ACCESS_KEY}
+    command: replicate /data/${SQLITE_DB_FILENAME} s3://${LITESTREAM_S3_BUCKET_NAME}/${SQLITE_DB_FILENAME}
+    volumes:
+      - ${DATA_FOLDER_BASEPATH}/homeipdb/${SQLITE_DB_FILENAME}:/data/${SQLITE_DB_FILENAME}
+    restart: unless-stopped
