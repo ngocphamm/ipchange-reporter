@@ -1,7 +1,7 @@
 services:
   ipcheck-php:
     image: php:cli-alpine
-    container_name: ipcheck
+    container_name: ipcheck-php
     command: >
       sh -c "printf 'date.timezone = ${TZ}' > $${PHP_INI_DIR}/conf.d/tzone.ini &&
       crond -f -l 8"
