@@ -1,5 +1,5 @@
 services:
-  ipcheck:
+  ipcheck-php:
     image: php:cli-alpine
     container_name: ipcheck
     command: >
